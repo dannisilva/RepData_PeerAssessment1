@@ -5,15 +5,12 @@ output:
     keep_md: true
 ---
 
-```{r setoptions, echo=FALSE}
 
-knitr::opts_chunk$set(warning = FALSE, message = FALSE)
-
-```
 
 ## Loading and preprocessing the data
 
-```{r loaddata, echo = TRUE}
+
+```r
 library(dplyr)
 library(ggplot2)
 library(lubridate)
@@ -25,13 +22,12 @@ unztemp <- unzip(temp)
 data = read.csv("activity.csv", sep = ",", header = T)
 
 data$date = as.Date(data$date,"%Y-%m-%d")
-
 ```
 
 ## What is mean total number of steps taken per day?
 
-```{r, echo = TRUE}
 
+```r
 steps_day = data %>%
         filter(!is.na(steps)) %>%
         group_by(date) %>%
@@ -39,19 +35,22 @@ steps_day = data %>%
 
 ggplot(steps_day, aes(x=sum_step)) +
         geom_histogram(bins = 8, color = "black", fill = "#5DADE2")
-
-meanpday = mean(steps_day$sum_step)
-medianpday = median(steps_day$sum_step)
-
 ```
 
-Mean per day: `r meanpday`
-Median per day `r medianpday`
+![](PA1_template_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
+
+```r
+meanpday = mean(steps_day$sum_step)
+medianpday = median(steps_day$sum_step)
+```
+
+Mean per day: 1.0766189\times 10^{4}
+Median per day 10765
 
 ## What is the average daily activity pattern?
 
-```{r, echo = TRUE}
 
+```r
 daily_act = data %>%
         filter(!is.na(steps)) %>%
         group_by(interval) %>%
@@ -60,16 +59,19 @@ daily_act = data %>%
 ggplot(daily_act, aes(x=interval)) +
         geom_line(aes(y=mean_daily_act, color="#922B21")) +
         theme(legend.position = "none") 
-
-max_step = daily_act[which.max(daily_act$mean_daily_act),"interval"]
-
 ```
-The 5-minute intervalcontains the maximum number of stepsMedian per day is `r max_step`
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
+```r
+max_step = daily_act[which.max(daily_act$mean_daily_act),"interval"]
+```
+The 5-minute intervalcontains the maximum number of stepsMedian per day is 835
 
 ## Imputing missing values
 
-```{r, echo = TRUE}
 
+```r
 nas = sum(is.na(data$steps))
 
 data_nmiss =  merge(data,daily_act, by = "interval")
@@ -82,23 +84,26 @@ steps_day_nmiss = data_nmiss %>%
 
 ggplot(steps_day_nmiss, aes(x=sum_step)) +
         geom_histogram(bins = 8, color = "black", fill = "#5DADE2")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```r
 meanpday_nmiss = mean(steps_day_nmiss$sum_step)
 medianpday_nmiss  = median(steps_day_nmiss$sum_step)
-
 ```
-The total number of missing values in the dataset is `r nas`
+The total number of missing values in the dataset is 2304
 
-New Mean per day: `r meanpday_nmiss`
-New Median per day `r medianpday_nmiss`
+New Mean per day: 1.0766189\times 10^{4}
+New Median per day 1.0766189\times 10^{4}
 
 There are no big difference between the means or medians.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r, echo = TRUE}
 
+```r
 data_nmiss$type_day = ifelse(weekdays(data_nmiss$date) %in% c("Saturday","Sunday"),"Weekend","Weekday")
 
 data_nmiss$type_day = factor(data_nmiss$type_day, levels = c("Weekday","Weekend"))
@@ -113,6 +118,6 @@ ggplot(steps_day_weekdays, aes(x=interval, color=type_day)) +
         theme(legend.position = "none") +
         scale_colour_manual(values = pal) +
         facet_wrap(type_day~., nrow = 2)
-
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
